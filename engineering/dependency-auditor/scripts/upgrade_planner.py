@@ -20,7 +20,6 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 from enum import Enum
 import re
-import subprocess
 
 class UpgradeRisk(Enum):
     """Upgrade risk levels."""

@@ -20,7 +20,6 @@ from pathlib import Path
 from dataclasses import dataclass, asdict
 from datetime import datetime
 import hashlib
-import subprocess
 
 @dataclass
 class Vulnerability:

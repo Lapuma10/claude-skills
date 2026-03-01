@@ -18,6 +18,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 from enum import Enum
@@ -381,7 +382,7 @@ def format_json_report(findings: List[SecretFinding], path: str) -> Dict:
     """Format findings as JSON."""
     return {
         "target": path,
-        "scan_date": __import__('datetime').datetime.now().isoformat(),
+        "scan_date": datetime.now().isoformat(),
         "summary": {
             "total": len(findings),
             "by_severity": {

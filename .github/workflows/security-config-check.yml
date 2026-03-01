@@ -1,0 +1,66 @@
+---
+name: Security Config File Check
+
+'on':
+  pull_request:
+    paths:
+      - '.claude/settings.json'
+      - '.mcp.json'
+      - '.claude/settings.local.json'
+
+jobs:
+  check-security-configs:
+    name: Flag dangerous config file changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Flag security-sensitive config changes
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const dangerousFiles = files.filter(f =>
+              f.filename === '.mcp.json' ||
+              f.filename === '.claude/settings.json' ||
+              f.filename === '.claude/settings.local.json'
+            );
+
+            if (dangerousFiles.length === 0) return;
+
+            const fileList = dangerousFiles.map(f => `- \`${f.filename}\` (${f.status})`).join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## Security Review Required
+
+            This PR modifies Claude Code configuration files that are known attack vectors:
+
+            ${fileList}
+
+            **Why this matters:**
+            - \`.mcp.json\` — Can auto-enable MCP servers (CVE-2025-59536 attack vector)
+            - \`.claude/settings.json\` — Can override environment variables including \`ANTHROPIC_BASE_URL\` (CVE-2026-21852 attack vector)
+
+            **Required actions:**
+            1. A security-aware reviewer must manually inspect these changes
+            2. Verify no \`enableAllProjectMcpServers\` or \`ANTHROPIC_BASE_URL\` overrides are introduced
+            3. Confirm changes are intentional and safe
+
+            ---
+            *Automated security check — see [CVE-2025-59536](https://nvd.nist.gov/vuln/detail/CVE-2025-59536) and [CVE-2026-21852](https://nvd.nist.gov/vuln/detail/CVE-2026-21852)*`
+            });
+
+            core.setFailed('Security-sensitive config files modified — manual review required');
