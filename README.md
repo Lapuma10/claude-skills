@@ -15,9 +15,52 @@
 
 **Choose your AI agent:**
 
-### Method 1: Claude Code Native (Recommended for Claude Code users)
+### Method 1: Claude Code Global Install (Recommended)
 
-Use Claude Code's built-in plugin system for native integration:
+Symlinks all 65 skills into `~/.claude/skills/` so they're available in every Claude Code session, in any project.
+
+```bash
+# Clone (first time only)
+git clone https://github.com/alirezarezvani/claude-skills.git
+cd claude-skills
+
+# Install all 65 skills globally
+./scripts/claude-code-install.sh
+
+# Preview before installing
+./scripts/claude-code-install.sh --dry-run
+```
+
+**Updating skills:**
+
+```bash
+cd claude-skills
+git pull
+./scripts/claude-code-install.sh    # picks up new/changed skills
+```
+
+**Other commands:**
+
+```bash
+./scripts/claude-code-install.sh --status              # see what's installed
+./scripts/claude-code-install.sh --category engineering # install one domain
+./scripts/claude-code-install.sh --list                 # list all available skills
+./scripts/claude-code-install.sh --uninstall            # remove all symlinks
+```
+
+**Benefits:**
+- All 65 skills available globally across every project
+- Live-linked via symlinks — `git pull` updates content instantly
+- Safe: won't overwrite non-symlinked skills from other sources
+- Idempotent: safe to re-run anytime
+
+**Available categories:** `marketing-skill` (6), `product-team` (5), `project-management` (6), `engineering-team` (19), `engineering` (11), `c-level-advisor` (2), `business-growth` (3), `ra-qm-team` (12), `finance` (1)
+
+---
+
+### Method 1b: Claude Code Plugin System
+
+Alternatively, use Claude Code's built-in plugin system:
 
 ```bash
 # In Claude Code, run:
